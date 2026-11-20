@@ -216,8 +216,8 @@ void save_into_file(void)
     return;
   }
   if (debug_mode) {
-    fprintf(stderr, "Debug: file name: %s, source: %#x, target: %#x, length: %d\n",
-            file_name, source, target, length);
+    fprintf(stderr, "Debug: file name: %s, source: %#x, target: %#x, length: %d\n", file_name,
+            source, target, length);
   }
   file = fopen(file_name, "r+b"); /* Update in place. Do not erase the file. */
   if (file == NULL) {
@@ -254,12 +254,31 @@ void save_into_file(void)
   fclose(file); /* Opened in this function, so closed here on every path. */
 }
 
-/* Placeholder. The next task replaces this. */
+/* Replace one unit inside mem_buf. location is an offset in the buffer. */
 void memory_modify(void)
 {
-  printf("Not implemented yet\n");
-}
+  char input[128];
+  unsigned int location;
+  unsigned int val;
 
+  printf("Please enter <location> <val>\n");
+  if (fgets(input, sizeof(input), stdin) == NULL)
+    return;
+  /* Both numbers are hexadecimal. */
+  if (sscanf(input, "%x %x", &location, &val) != 2) {
+    printf("Invalid location or value\n");
+    return;
+  }
+  if (debug_mode)
+    fprintf(stderr, "Debug: location: %#x, val: %#x\n", location, val);
+  /* The unit must fit inside the 10000-byte buffer. */
+  if (location > 10000 || (unsigned int)unit_size > 10000 - location) {
+    printf("Location is out of range\n");
+    return;
+  }
+  /* Low byte is stored first. Copy only unit_size bytes of val. */
+  memcpy(mem_buf + location, &val, unit_size);
+}
 /* Exit. In debug mode, report that on stderr before leaving. */
 void quit(void)
 {
