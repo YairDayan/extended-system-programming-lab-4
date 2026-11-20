@@ -69,14 +69,14 @@ void set_file_name(void)
 /* Set the unit size. Only 1, 2, and 4 are valid; other input is ignored. */
 void set_unit_size(void)
 {
-  char input[1028];
+  char input[128];
   int size;
 
   printf("Please enter a number\n");
   if (fgets(input, sizeof(input), stdin) == NULL)
     return;
   if (sscanf(input, "%d", &size) != 1 || (size != 1 && size != 2 && size != 4)) {
-    printf("Invalide unit size\n");
+    printf("Invalid unit size\n");
     return;
   }
   unit_size = size;
@@ -311,7 +311,7 @@ int main(void)
     if (fgets(input, sizeof(input), stdin) == NULL)
       break; /* No more input. */
     if (sscanf(input, "%d", &choice) != 1 || choice < 0 || choice >= bound) {
-      printf("Invalide choice\n");
+      printf("Invalid choice\n");
       continue; /* Only Quit leaves the loop through exit. */
     }
     menu[choice].fun(); /* Dispatch through the pointer in the table. */
