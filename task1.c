@@ -24,7 +24,7 @@ void quit();
 /* One menu row: the label shown to the user, and the function it runs. */
 struct fun_desc {
   char *name;
-  void (*fun)(void);
+  void (*fun)();
 };
 
 /* The last row is the sentinel. main stops when name is NULL. */
