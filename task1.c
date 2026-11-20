@@ -11,15 +11,15 @@ size_t mem_count = 0;         /* How many bytes in mem_buf are valid. */
 char display_mode = 0;        /* 0 = hexadecimal, 1 = decimal. */
 
 /* Named here so the menu table below can store their addresses. */
-void toggle_debug_mode(void);
-void set_file_name(void);
-void set_unit_size(void);
-void load_into_memory(void);
-void toggle_display_mode(void);
-void memory_display(void);
-void save_into_file(void);
-void memory_modify(void);
-void quit(void);
+void toggle_debug_mode();
+void set_file_name();
+void set_unit_size();
+void load_into_memory();
+void toggle_display_mode();
+void memory_display();
+void save_into_file();
+void memory_modify();
+void quit();
 
 /* One menu row: the label shown to the user, and the function it runs. */
 struct fun_desc {
@@ -40,7 +40,7 @@ struct fun_desc menu[] = {{"Toggle Debug Mode", toggle_debug_mode},
                           {NULL, NULL}};
 
 /* Flip the debug flag and report the new state on stderr. */
-void toggle_debug_mode(void)
+void toggle_debug_mode()
 {
   if (debug_mode) {
     fprintf(stderr, "Debug flag now off\n");
@@ -52,7 +52,7 @@ void toggle_debug_mode(void)
 }
 
 /* Store a file name. The file is not opened here. */
-void set_file_name(void)
+void set_file_name()
 {
   char input[128];
 
@@ -67,7 +67,7 @@ void set_file_name(void)
 }
 
 /* Set the unit size. Only 1, 2, and 4 are valid; other input is ignored. */
-void set_unit_size(void)
+void set_unit_size()
 {
   char input[128];
   int size;
@@ -86,7 +86,7 @@ void set_unit_size(void)
 }
 
 /* Copy length units from file_name, starting at a hex file offset, into mem_buf. */
-void load_into_memory(void)
+void load_into_memory()
 {
   char input[128];
   unsigned int location;
@@ -137,7 +137,7 @@ void load_into_memory(void)
 }
 
 /* Flip the display flag. The bytes in memory are not printed here. */
-void toggle_display_mode(void)
+void toggle_display_mode()
 {
   if (display_mode) {
     printf("Decimal display flag now off, hexadecimal representation\n");
@@ -149,7 +149,7 @@ void toggle_display_mode(void)
 }
 
 /* Print length numbers from memory. Address 0 means the start of mem_buf. */
-void memory_display(void)
+void memory_display()
 {
   /* Index is unit_size - 1. Slot 2 is unused because a unit is never 3 bytes. */
   static char *hex_formats[] = {"%#hhx\n", "%#hx\n", "No such unit", "%#x\n"};
@@ -193,7 +193,7 @@ void memory_display(void)
 }
 
 /* Write length units from memory onto a file offset. The rest of the file stays. */
-void save_into_file(void)
+void save_into_file()
 {
   char input[128];
   unsigned int source;
@@ -255,7 +255,7 @@ void save_into_file(void)
 }
 
 /* Replace one unit inside mem_buf. location is an offset in the buffer. */
-void memory_modify(void)
+void memory_modify()
 {
   char input[128];
   unsigned int location;
@@ -280,7 +280,7 @@ void memory_modify(void)
   memcpy(mem_buf + location, &val, unit_size);
 }
 /* Exit. In debug mode, report that on stderr before leaving. */
-void quit(void)
+void quit()
 {
   if (debug_mode)
     fprintf(stderr, "quitting\n");
