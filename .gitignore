@@ -1,0 +1,18 @@
+# Build artifacts
+*.o
+*.out
+*.dSYM/
+**/units/units
+
+# Course materials stay local
+*.pdf
+*.png
+*.zip
+.DS_Store
+.cursor/
+
+# Provided ELF samples (not source)
+abc
+deep_thought
+ntsc
+offensive
