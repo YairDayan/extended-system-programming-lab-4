@@ -115,7 +115,7 @@ void load_into_memory(void)
     return;
   }
   bytes = (size_t)length * (size_t)unit_size; /* Unit count to a byte count. */
-  if (bytes > 10000) { /* mem_buf holds at most 10000 bytes. */
+  if (bytes > 10000) {                        /* mem_buf holds at most 10000 bytes. */
     printf("Requested size is too large\n");
     fclose(file);
     return;
@@ -186,7 +186,7 @@ void memory_display(void)
     formats = hex_formats;
   }
   for (int i = 0; i < length; i++) {
-    int var = *((int *)start); /* Always read 4 bytes, as print_units does. */
+    int var = *((int *)start);           /* Always read 4 bytes, as print_units does. */
     printf(formats[unit_size - 1], var); /* The format keeps only this unit. */
     start += unit_size;
   }
@@ -195,7 +195,63 @@ void memory_display(void)
 /* Placeholders. Later tasks replace these. */
 void save_into_file(void)
 {
-  printf("Not implemented yet\n");
+  char input[128];
+  unsigned int source;
+  unsigned int target;
+  int length;
+  unsigned char *start;
+  long file_size;
+  FILE *file;
+
+  if (file_name[0] == '\0') {
+    printf("No file name set\n");
+    return;
+  }
+  printf("Please enter <source-address> <target-location> <length>\n");
+  if (fgets(input, sizeof(input), stdin) == NULL)
+    return;
+  /* Two hex numbers, then a decimal unit count. */
+  if (sscanf(input, "%x %x %d", &source, &target, &length) != 3 || length <= 0) {
+    printf("Invalid source, target, or length\n");
+    return;
+  }
+  if (debug_mode) {
+    fprintf(stderr, "Debug: file name: %s, source: %#x, target: %#x, length: %d\n", file_name,
+            source, target, length);
+  }
+  file = fopen(file_name, "r+b"); /* Update in place. Do not erase the file. */
+  if (file == NULL) {
+    printf("Failed to open file\n");
+    return;
+  }
+  if (fseek(file, 0, SEEK_END) != 0) {
+    printf("Failed to read file size\n");
+    fclose(file);
+    return;
+  }
+  file_size = ftell(file);
+  if (file_size < 0 || target > (unsigned int)file_size) {
+    printf("Target location is past the end of the file\n");
+    fclose(file);
+    return;
+  }
+  if (source == 0)
+    start = mem_buf;
+  else
+    start = (unsigned char *)source;
+  if (source == 0 && (size_t)length * (size_t)unit_size > 10000) {
+    printf("Requested size is too large\n");
+    fclose(file);
+    return;
+  }
+  /* fwrite counts units, as write_units does in units.c. */
+  if (fseek(file, (long)target, SEEK_SET) != 0 ||
+      fwrite(start, unit_size, length, file) != (size_t)length) {
+    printf("Failed to write file\n");
+    fclose(file);
+    return;
+  }
+  fclose(file);
 }
 void memory_modify(void)
 {
