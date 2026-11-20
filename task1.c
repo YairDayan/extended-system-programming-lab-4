@@ -8,6 +8,7 @@ char file_name[128] = "";     /* Target file. Empty until the user sets it. */
 int unit_size = 1;            /* Bytes in one unit: 1, 2, or 4. */
 unsigned char mem_buf[10000]; /* Raw bytes loaded from the file. */
 size_t mem_count = 0;         /* How many bytes in mem_buf are valid. */
+char display_mode = 0;        /* 0 = hexadecimal, 1 = decimal. */
 
 /* Named here so the menu table below can store their addresses. */
 void toggle_debug_mode(void);
@@ -113,7 +114,7 @@ void load_into_memory(void)
     fclose(file);
     return;
   }
-  bytes = (size_t)length * (size_t)unit_size;
+  bytes = (size_t)length * (size_t)unit_size; /* Unit count to a byte count. */
   if (bytes > 10000) { /* mem_buf holds at most 10000 bytes. */
     printf("Requested size is too large\n");
     fclose(file);
@@ -135,15 +136,63 @@ void load_into_memory(void)
   printf("Loaded %d units into memory\n", length);
 }
 
-/* Placeholders. Each later task replaces one of these. */
+/* Flip the display flag. The bytes in memory are not printed here. */
 void toggle_display_mode(void)
 {
-  printf("Not implemented yet\n");
+  if (display_mode) {
+    printf("Decimal display flag now off, hexadecimal representation\n");
+    display_mode = 0;
+  } else {
+    display_mode = 1;
+    printf("Decimal display flag now on, decimal representation\n");
+  }
 }
+
+/* Print length numbers from memory. Address 0 means the start of mem_buf. */
 void memory_display(void)
 {
-  printf("Not implemented yet\n");
+  /* Index is unit_size - 1. Slot 2 is unused because a unit is never 3 bytes. */
+  static char *hex_formats[] = {"%#hhx\n", "%#hx\n", "No such unit", "%#x\n"};
+  static char *dec_formats[] = {"%#hhd\n", "%#hd\n", "No such unit", "%#d\n"};
+  char input[128];
+  unsigned int addr;
+  int length;
+  unsigned char *start;
+  char **formats;
+
+  printf("Enter address and length\n");
+  if (fgets(input, sizeof(input), stdin) == NULL)
+    return;
+  /* Address is hex. Length is a decimal count of units. */
+  if (sscanf(input, "%x %d", &addr, &length) != 2 || length <= 0) {
+    printf("Invalid address or length\n");
+    return;
+  }
+  if (debug_mode)
+    fprintf(stderr, "Debug: address: %#x, length: %d\n", addr, length);
+  if (addr == 0)
+    start = mem_buf; /* The copy loaded from the file. */
+  else
+    start = (unsigned char *)addr; /* A 32-bit lab address. int and pointer match there. */
+  if (addr == 0 && (size_t)length * (size_t)unit_size > 10000) {
+    printf("Requested size is too large\n");
+    return;
+  }
+  if (display_mode) {
+    printf("Decimal\n=======\n"); /* Underline matches the sample heading. */
+    formats = dec_formats;
+  } else {
+    printf("Hexadecimal\n===========\n");
+    formats = hex_formats;
+  }
+  for (int i = 0; i < length; i++) {
+    int var = *((int *)start); /* Always read 4 bytes, as print_units does. */
+    printf(formats[unit_size - 1], var); /* The format keeps only this unit. */
+    start += unit_size;
+  }
 }
+
+/* Placeholders. Later tasks replace these. */
 void save_into_file(void)
 {
   printf("Not implemented yet\n");
