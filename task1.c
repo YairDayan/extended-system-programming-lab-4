@@ -192,7 +192,7 @@ void memory_display(void)
   }
 }
 
-/* Placeholders. Later tasks replace these. */
+/* Write length units from memory onto a file offset. The rest of the file stays. */
 void save_into_file(void)
 {
   char input[128];
@@ -216,8 +216,8 @@ void save_into_file(void)
     return;
   }
   if (debug_mode) {
-    fprintf(stderr, "Debug: file name: %s, source: %#x, target: %#x, length: %d\n", file_name,
-            source, target, length);
+    fprintf(stderr, "Debug: file name: %s, source: %#x, target: %#x, length: %d\n",
+            file_name, source, target, length);
   }
   file = fopen(file_name, "r+b"); /* Update in place. Do not erase the file. */
   if (file == NULL) {
@@ -229,16 +229,16 @@ void save_into_file(void)
     fclose(file);
     return;
   }
-  file_size = ftell(file);
+  file_size = ftell(file); /* Byte offset of the end, which is the file size. */
   if (file_size < 0 || target > (unsigned int)file_size) {
     printf("Target location is past the end of the file\n");
     fclose(file);
     return;
   }
   if (source == 0)
-    start = mem_buf;
+    start = mem_buf; /* The copy loaded from the file. */
   else
-    start = (unsigned char *)source;
+    start = (unsigned char *)source; /* A 32-bit lab address. int and pointer match there. */
   if (source == 0 && (size_t)length * (size_t)unit_size > 10000) {
     printf("Requested size is too large\n");
     fclose(file);
@@ -251,8 +251,10 @@ void save_into_file(void)
     fclose(file);
     return;
   }
-  fclose(file);
+  fclose(file); /* Opened in this function, so closed here on every path. */
 }
+
+/* Placeholder. The next task replaces this. */
 void memory_modify(void)
 {
   printf("Not implemented yet\n");
